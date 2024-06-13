@@ -27,4 +27,8 @@ router.post('/sendMessage', async (req, res) => {
     }
 });
 
+router.get('/get', (req, res) =>{
+    res.json({message: 'get working'})
+})
+
 module.exports = router;
