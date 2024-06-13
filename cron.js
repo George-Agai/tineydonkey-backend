@@ -3,7 +3,7 @@ const cron = require('node-cron');
 const axios = require('axios');
 
 function startCronJob() {
-  const functionUrl = 'https://uninterested-antelope.onrender.com/login/get';
+  const functionUrl = 'https://uninterested-antelope.onrender.com/get';
 
   cron.schedule('*/5 * * * *', async() => {
     await axios.get(functionUrl)
