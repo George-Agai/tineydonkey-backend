@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+// const cache = require("../cacheMiddleware");
 const mongoose = require('mongoose');
 const multer = require('multer');
 const Product = require("../TineyDonkeyModels/Product");
