@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 
 router.post("/login", async (req, res) => {
     const { username, password } = req.body;
-    const secretKey = 'onlyHerbHasTheMostSecretKeyOutThere';
+    const secretKey = process.env.secretKey;
 
     let userSpecifics = {}
     try {
@@ -15,10 +15,7 @@ router.post("/login", async (req, res) => {
         if(user){
             userSpecifics = {
                 _id: user._id,
-                username: user.username,
-                referralCode: user.referralCode,
-                previousOrderDetails: user.previousOrderDetails,
-                contact: user.contact
+                username: user.username
             }
         }
         let accountType = "User";
@@ -28,14 +25,7 @@ router.post("/login", async (req, res) => {
             if(user){
                 userSpecifics = {
                     _id: user._id,
-                    username: user.username,
-                    shopOpen: user.shopOpen,
-                    productDetails: user.productDetails,
-                    daysAmount: user.daysAmount,
-                    monthsAmount: user.monthsAmount,
-                    contact: user.contact,
-                    totalPins: user.totalPins,
-                    referralCode: user.referralCode
+                    username: user.username
                 }
             }
             accountType = "Business";
@@ -57,7 +47,6 @@ router.post("/login", async (req, res) => {
 
             return res.status(200).json({
                 message: "Auth successful",
-                accountType,
                 userSpecifics,
                 token
             });
