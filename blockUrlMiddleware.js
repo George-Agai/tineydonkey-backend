@@ -1,9 +1,10 @@
 const blockUrlMiddleware = (req, res, next) => {
   const url = process.env.URL
   const testUrl = process.env.TEST_URL
+  const phone = process.env.PHONE
 
   const authorizedUrls = []
-  authorizedUrls.push(url, testUrl)
+  authorizedUrls.push(url, testUrl, phone)
   
   const requestedUrl = req.headers.referer || req.headers.origin;
   console.log(requestedUrl)
