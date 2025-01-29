@@ -1,6 +1,7 @@
 var express = require("express");
 const mongoose = require('mongoose');
 require('dotenv').config();
+const morgan = require('morgan');
 
 const sale = require("./TineyDonkeyRoutes/sale")
 const subscribe = require("./TineyDonkeyRoutes/newsletter")
@@ -27,12 +28,15 @@ const connectDB = async () => {
 }
 app.use(blockUrlMiddleware);
 app.use(express.json());
-app.use(express.static('Public'))
+app.use(express.static('Public', {
+    maxAge: '1d'
+}))
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     next();
 });
 app.use(cors())
+app.use(morgan('dev'));
 
 app.use("/", sale);
 app.use("/", subscribe);
@@ -45,7 +49,7 @@ app.use("/", authentication);
 
 connectDB().then(() => {
     app.listen(port, () => {
-        console.log(`listening on some port`)
+        console.log(`listening on some port ${port}`)
     })
 })
 cronJob()
