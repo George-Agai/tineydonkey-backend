@@ -55,6 +55,7 @@ router.get('/getPendingOrders', async (req, res) => {
     }
 })
 
+
 router.post('/orderDelivered', async (req, res) => {
     try {
         const saleId = req.query.id
