@@ -3,8 +3,10 @@ const router = express.Router();
 // const cache = require("../cacheMiddleware");
 const mongoose = require('mongoose');
 const multer = require('multer');
+var apicache = require('apicache');
 const Product = require("../TineyDonkeyModels/Product");
 
+var cache = apicache.middleware
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -54,7 +56,7 @@ router.get("/getProduct", async (req, res) => {
     }
 });
 
-router.get('/fetchProduct', async (req, res) => {
+router.get('/fetchProduct', cache('1 day'), async (req, res) => {
     try {
         const productId = req.query.id;
         if (productId.length == 24) {
