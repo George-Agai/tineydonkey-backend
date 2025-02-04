@@ -44,10 +44,40 @@ router.post('/saveOrder', async (req, res) => {
     }
 });
 
+const getTotalFigurinesInStock = async () => {
+    try {
+        const totalProducts = await Product.find({ status: true });
+        const totalRemainingStockWorth = totalProducts.reduce((sum, order) => sum + order.price, 0);
+        const stockInfo = {
+            totalProductsInStock: totalProducts.length,
+            totalRemainingStockWorth: totalRemainingStockWorth
+        }
+        return stockInfo
+    } catch (err) {
+        console.log(err)
+    }
+}
+
 router.get('/getPendingOrders', async (req, res) => {
     try {
-        const pendingOrders = await Sale.find({})
-        res.json(pendingOrders)
+        const pendingOrders = await Sale.find({
+            $or: [{ orderStatus: "pending" }, { orderStatus: "delivered" }]
+        });
+        const stockInfo = await getTotalFigurinesInStock()
+        res.json({ pendingOrders, stockInfo })
+    }
+    catch (err) {
+        console.log(err)
+        res.json(err)
+    }
+})
+
+router.get('/getAllPreviousOrders', async (req, res) => {
+    try {
+        const orders = await Sale.find({
+            $or: [{ orderStatus: "cancelled" }, { orderStatus: "delivered" }]
+        });
+        res.json(orders);
     }
     catch (err) {
         console.log(err)
@@ -60,7 +90,7 @@ router.post('/orderDelivered', async (req, res) => {
     try {
         const saleId = req.query.id
         const deliveredOrder = await Sale.findByIdAndUpdate(saleId, { $set: { orderStatus: "delivered" } }, { new: true })
-        if(deliveredOrder){
+        if (deliveredOrder) {
             const cashflow = new Cashflow({
                 description: "Sale",
                 amount: deliveredOrder.totalAmount,
@@ -97,7 +127,6 @@ router.post('/rejectOrder', async (req, res) => {
         else {
             res.json({ mesage: 'Update failed' })
         }
-
 
     } catch (error) {
         consolelog(error)
