@@ -4,6 +4,8 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const multer = require('multer');
 var apicache = require('apicache');
+const fs = require('fs')
+const path = require('path');
 const Product = require("../TineyDonkeyModels/Product");
 
 var cache = apicache.middleware
@@ -91,6 +93,39 @@ router.post('/checkProduct', async (req, res) => {
     const idArray = req.body;
     const productStatusResults = await Promise.all(idArray.map(id => getProductStatusById(id)));
     res.json({ productStatusResults, message: "Found products" });
+});
+
+router.delete('/deleteProduct/:id', async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        // Define image directory path
+        const imageDir = path.join(__dirname, '../Public/Images/');
+
+        // Delete each image file
+        product.image.forEach((imageName) => {
+            const imagePath = path.join(imageDir, imageName);
+
+            if (fs.existsSync(imagePath)) {
+                fs.unlink(imagePath, (err) => {
+                    if (err) console.error(`Failed to delete ${imageName}:`, err);
+                });
+            }
+        });
+
+        // Delete product from database
+        await Product.findByIdAndDelete(req.params.id);
+        const updatedProducts = await Product.find({});
+
+        res.json({ message: 'Product and images deleted successfully', updatedProducts });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
 });
 
 module.exports = router;
