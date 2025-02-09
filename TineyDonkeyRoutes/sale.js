@@ -134,4 +134,22 @@ router.post('/rejectOrder', async (req, res) => {
     }
 })
 
+router.post('/cancelOrder', async (req, res) => {
+    try {
+        const { productIds, saleId } = req.body
+        await Promise.all(productIds.map(id => setProductStatusTrue(id)))
+        const updated = await Sale.findByIdAndUpdate(saleId, { $set: { orderStatus: "deleted" } }, { new: true });
+        if (updated) {
+            res.json({ message: 'Deleted successfully' })
+        }
+        else {
+            res.json({ mesage: 'Update failed' })
+        }
+
+    } catch (error) {
+        consolelog(error)
+        res.json({ mesage: 'Something went wrong', error })
+    }
+});
+
 module.exports = router;
