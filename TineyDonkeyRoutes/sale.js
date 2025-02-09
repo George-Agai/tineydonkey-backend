@@ -75,7 +75,7 @@ router.get('/getPendingOrders', async (req, res) => {
 router.get('/getAllPreviousOrders', async (req, res) => {
     try {
         const orders = await Sale.find({
-            $or: [{ orderStatus: "cancelled" }, { orderStatus: "delivered" }]
+            $or: [{ orderStatus: "cancelled" }, { orderStatus: "delivered" }, { orderStatus: "deleted" }]
         });
         res.json(orders);
     }
