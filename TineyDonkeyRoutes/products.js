@@ -58,20 +58,25 @@ router.get("/getProduct", async (req, res) => {
     }
 });
 
-router.get('/fetchProduct', cache('1 day'), async (req, res) => {
+router.get('/fetchProduct/:slug', cache('1 day'), async (req, res) => {
     try {
-        const productId = req.query.id;
-        if (productId.length == 24) {
-            const sanitizedId = new mongoose.Types.ObjectId(productId);
-            await Product.findById(sanitizedId)
-                .then((data) => {
-                    res.json(data)
-                })
-                .catch(err => console.log(err))
-        }
-        else{
-            res.json({message: "Haha, nothing here fam"})
-        }
+        // const productId = req.query.id;
+        // if (productId.length == 24) {
+        //     const sanitizedId = new mongoose.Types.ObjectId(productId);
+        //     await Product.findById(sanitizedId)
+        //         .then((data) => {
+        //             res.json(data)
+        //         })
+        //         .catch(err => console.log(err))
+        // }
+        // else{
+        //     res.json({message: "Haha, nothing here fam"})
+        // }
+        console.log("fetchProduct Endpoint hit")
+        const data = await Product.findOne({ slug: req.params.slug });
+        if (!data) return res.status(404).json({ message: "Product not found" });
+        console.log(data)
+        res.json(data);
 
     }
     catch (error) {
