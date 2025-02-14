@@ -48,9 +48,35 @@ router.post("/uploadProduct", upload.array('image', 5), async (req, res) => {
     }
 });
 
+const updateProductStatus = async () => {
+    try {
+        const products = await Product.find({});
+
+        for (let product of products) {
+            let newStatus = product.status === true ? "available" : "sold";
+
+            await Product.findByIdAndUpdate(product._id, { status: newStatus });
+        }
+
+        console.log("Product statuses updated successfully.");
+    } catch (error) {
+        console.error("Error updating product statuses:", error);
+    }
+};
+
 router.get("/getProduct", async (req, res) => {
     try {
-        Product.find({}).then((data) => {
+        Product.find({ status: { $in: ['available', 'sold'] } }).then((data) => {
+            res.json(data);
+        });
+    } catch (error) {
+        res.json({ status: error });
+    }
+});
+
+router.get("/getArchivedProducts", async (req, res) => {
+    try {
+        Product.find({ status: { $in: ['archived'] } }).then((data) => {
             res.json(data);
         });
     } catch (error) {
@@ -60,27 +86,14 @@ router.get("/getProduct", async (req, res) => {
 
 router.get('/fetchProduct/:slug', cache('1 day'), async (req, res) => {
     try {
-        // const productId = req.query.id;
-        // if (productId.length == 24) {
-        //     const sanitizedId = new mongoose.Types.ObjectId(productId);
-        //     await Product.findById(sanitizedId)
-        //         .then((data) => {
-        //             res.json(data)
-        //         })
-        //         .catch(err => console.log(err))
-        // }
-        // else{
-        //     res.json({message: "Haha, nothing here fam"})
-        // }
-        console.log("fetchProduct Endpoint hit")
         const data = await Product.findOne({ slug: req.params.slug });
         if (!data) return res.status(404).json({ message: "Product not found" });
-        console.log(data)
         res.json(data);
 
     }
     catch (error) {
         console.log(error)
+        res.json(error);
     }
 })
 
@@ -108,7 +121,6 @@ router.delete('/deleteProduct/:id', async (req, res) => {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        // Define image directory path
         const imageDir = path.join(__dirname, '../Public/Images/');
 
         // Delete each image file
@@ -122,11 +134,44 @@ router.delete('/deleteProduct/:id', async (req, res) => {
             }
         });
 
-        // Delete product from database
         await Product.findByIdAndDelete(req.params.id);
         const updatedProducts = await Product.find({});
 
         res.json({ message: 'Product and images deleted successfully', updatedProducts });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+router.delete('/removeFromShop/:id', async (req, res) => {
+    try {
+        const product = await Product.findByIdAndUpdate(req.params.id, { status: "archived" });
+
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        // Define image directory path
+        const imageDir = path.join(__dirname, '../Public/Images/');
+
+        // Remove all images except the first one
+        product.image.slice(1).forEach((imageName) => {
+            const imagePath = path.join(imageDir, imageName);
+            if (fs.existsSync(imagePath)) {
+                fs.unlink(imagePath, (err) => {
+                    if (err) console.error(`Failed to delete ${imageName}:`, err);
+                });
+            }
+        });
+
+        // Keep only the first image in the array
+        product.image = product.image.slice(0, 1);
+
+        // Save the updated product (without deleted images)
+        await product.save();
+
+        res.json({ message: 'Product removed and images updated', product });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });

@@ -4,10 +4,12 @@ const Sale = require("../TineyDonkeyModels/Sale");
 const Product = require("../TineyDonkeyModels/Product");
 const Cashflow = require("../TineyDonkeyModels/cashflow");
 
+const axios = require('axios');
+
 
 const setProductStatusFalse = async (id) => {
     try {
-        const updateResult = await Product.findByIdAndUpdate(id, { $set: { status: false } }, { new: true });
+        const updateResult = await Product.findByIdAndUpdate(id, { $set: { status: "sold" } }, { new: true });
         return updateResult
     }
     catch (err) {
@@ -46,7 +48,7 @@ router.post('/saveOrder', async (req, res) => {
 
 const getTotalFigurinesInStock = async () => {
     try {
-        const totalProducts = await Product.find({ status: true });
+        const totalProducts = await Product.find({ status: "available" });
         const totalRemainingStockWorth = totalProducts.reduce((sum, order) => sum + order.price, 0);
         const stockInfo = {
             totalProductsInStock: totalProducts.length,
@@ -75,7 +77,7 @@ router.get('/getPendingOrders', async (req, res) => {
 router.get('/getAllPreviousOrders', async (req, res) => {
     try {
         const orders = await Sale.find({
-            $or: [{ orderStatus: "cancelled" }, { orderStatus: "delivered" }, { orderStatus: "deleted" }]
+            $or: [{ orderStatus: "cancelled" }, { orderStatus: "delivered" }, { orderStatus: "deleted" }, { orderStatus: "giveaway" }]
         });
         res.json(orders);
     }
@@ -108,7 +110,7 @@ router.post('/orderDelivered', async (req, res) => {
 
 const setProductStatusTrue = async (id) => {
     try {
-        const updateResult = await Product.findByIdAndUpdate(id, { $set: { status: true } }, { new: true });
+        const updateResult = await Product.findByIdAndUpdate(id, { $set: { status: "available" } }, { new: true });
         return updateResult
     }
     catch (err) {
@@ -149,6 +151,28 @@ router.post('/cancelOrder', async (req, res) => {
     } catch (error) {
         consolelog(error)
         res.json({ mesage: 'Something went wrong', error })
+    }
+});
+
+
+router.post('/giveaway', async (req, res) => {
+    try {
+        const order = req.body;
+        const orderSaved = await axios.post('{http://192.168.0.104:3000}/saveOrder', order)
+        if (orderSaved) {
+            console.log("Saved order-->", orderSaved.data)
+            const saleId = orderSaved.data.savedSale._id
+            const deliveredOrder = await Sale.findByIdAndUpdate(saleId, { $set: { orderStatus: "giveaway" } }, { new: true })
+            if (deliveredOrder){
+                res.json({ message: 'Giveaway sale set successfully'})
+            }
+        }
+        else {
+            res.json({ message: 'Failed to save sale' })
+        }
+    }
+    catch (err) {
+        console.log(err)
     }
 });
 

@@ -12,8 +12,9 @@ const Product = new mongoose.Schema({
         type: Number
     },
     status: {
-        type: Boolean,
-        default: true
+        type: String,
+        enum: ['available', 'sold', 'archived'],
+        default: 'available'
     },
     slug: {
         type: String,
