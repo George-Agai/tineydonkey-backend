@@ -37,7 +37,7 @@ router.post("/uploadProduct", upload.array('image', 5), async (req, res) => {
 
         const result = await Product.create(product);
         if (result) {
-            const data = await Product.find({});
+            const data = await Product.find({ status: "available" });
             res.json({ message: "Upload successful", data });
         } else {
             res.status(500).json({ error: 'Internal Server Error' });
