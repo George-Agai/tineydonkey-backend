@@ -7,7 +7,7 @@ const blockUrlMiddleware = (req, res, next) => {
   authorizedUrls.push(url, testUrl, phone)
   
   const requestedUrl = req.headers.referer || req.headers.origin;
-  // console.log(requestedUrl)
+  console.log("Request Source-->", requestedUrl)
   if (!authorizedUrls.includes(requestedUrl)) {
     return res.status(403).json({ error: 'Access forbidden' });
   }
