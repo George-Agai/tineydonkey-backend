@@ -10,6 +10,7 @@ const products = require("./TineyDonkeyRoutes/products");
 const cashflow = require("./TineyDonkeyRoutes/cashflow");
 const login = require("./TineyDonkeyRoutes/login");
 const authentication = require("./TineyDonkeyRoutes/business");
+const daysNgapi = require("./DaysNgapi/routes/user");
 
 const blockUrlMiddleware = require('./blockUrlMiddleware');
 const cronJob = require('./cron.js');
@@ -45,6 +46,7 @@ app.use("/", products);
 app.use("/", cashflow);
 app.use("/", login);
 app.use("/", authentication);
+app.use("/daysNgapi", daysNgapi);
 
 
 connectDB().then(() => {
