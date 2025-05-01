@@ -4,7 +4,7 @@ const axios = require('axios');
 
 function startCronJob() {
   const functionUrl = 'https://uninterested-antelope.onrender.com/get';
-  // const functionUrl = 'http://192.168.0.105:3000/get';
+  // const functionUrl = 'http://192.168.0.106:3000/get';
 
 
   cron.schedule('*/5 * * * *', async() => {
