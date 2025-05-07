@@ -2,6 +2,8 @@ var express = require("express");
 const mongoose = require('mongoose');
 require('dotenv').config();
 const morgan = require('morgan');
+const cors = require('cors')
+var app = express();
 
 const sale = require("./TineyDonkeyRoutes/sale")
 const subscribe = require("./TineyDonkeyRoutes/newsletter")
@@ -12,10 +14,51 @@ const login = require("./TineyDonkeyRoutes/login");
 const authentication = require("./TineyDonkeyRoutes/business");
 const daysNgapi = require("./DaysNgapi/routes/user");
 
-const blockUrlMiddleware = require('./blockUrlMiddleware');
+// const blockUrlMiddleware = require('./blockUrlMiddleware');
 const cronJob = require('./cron.js');
-const cors = require('cors')
-var app = express();
+
+
+
+
+const url = process.env.URL
+const testUrl = process.env.TEST_URL
+const phone = process.env.PHONE
+const daysNgapiDev = process.env.DAYS_NGAPI_DEV
+const daysNgapiProd = process.env.DAYS_NGAPI_PROD
+
+
+const normalize = (u) => u?.replace(/\/$/, '');
+//Configure your allowed origins
+const allowedOrigins = [
+    url, daysNgapiProd, daysNgapiDev, testUrl, phone
+].map(normalize);
+
+console.log("Allowed origins:", allowedOrigins);
+//Set up CORS middleware *before* any routes
+app.use(cors({
+    origin: (origin, cb) => {
+      console.log("Request origin-->", origin);
+      // allow non-browser requests
+      if (!origin) return cb(null, true);
+  
+      if (allowedOrigins.includes(normalize(origin))) {
+        return cb(null, true);
+      }
+  
+      cb(new Error('Not allowed by CORS'));
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }));
+//Explicitly handle OPTIONS preflight
+app.options('*', cors());
+
+
+
+
+
+
+
 
 const port = process.env.PORT || 3000
 const connectDB = async () => {
@@ -27,16 +70,16 @@ const connectDB = async () => {
         process.exit(1);
     }
 }
-app.use(blockUrlMiddleware);
+// app.use(blockUrlMiddleware);
 app.use(express.json());
 app.use(express.static('Public', {
     maxAge: '1d'
 }))
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    next();
-});
-app.use(cors())
+// app.use((req, res, next) => {
+//     res.setHeader('Access-Control-Allow-Origin', '*');
+//     next();
+// });
+// app.use(cors())
 app.use(morgan('dev'));
 
 app.use("/", sale);
