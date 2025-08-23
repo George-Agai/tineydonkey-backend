@@ -178,4 +178,41 @@ router.delete('/removeFromShop/:id', async (req, res) => {
     }
 });
 
+router.put("/editProduct/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { productName, status, slug, price, image } = req.body;
+
+        // Validate status
+        if (status && !["available", "sold"].includes(status)) {
+            return res.status(400).json({ message: "Invalid status value" });
+        }
+
+        // Update product
+        const updatedProduct = await Product.findByIdAndUpdate(
+            id,
+            {
+                ...(productName && { productName }),
+                ...(status && { status }),
+                ...(slug && { slug }),
+                ...(price && { price }),
+                ...(image && { image }),
+            },
+            { new: true }
+        );
+
+        if (!updatedProduct) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        res.json({
+            message: "Product updated",
+            updatedProduct,
+        });
+    } catch (error) {
+        console.error("Error updating product:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
 module.exports = router;
