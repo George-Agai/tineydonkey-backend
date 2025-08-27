@@ -5,7 +5,6 @@ const morgan = require('morgan');
 const cors = require('cors')
 var app = express();
 const http = require("http");
-// const { Server } = require("socket.io");
 const httpServer = http.createServer(app);
 const cronJob = require('./cron.js');
 
@@ -18,7 +17,6 @@ const login = require("./TineyDonkeyRoutes/login");
 const authentication = require("./TineyDonkeyRoutes/business");
 const daysNgapi = require("./DaysNgapi/routes/user");
 
-// require("./MultiPuck/routes/server");
 require("./MultiPuck/routes/server")(httpServer);
 
 
@@ -39,7 +37,9 @@ const allowedOrigins = [
 //Set up CORS middleware *before* any routes
 app.use(cors({
     origin: (origin, cb) => {
-        console.log("Request origin-->", origin);
+        if (origin !== undefined) {
+            console.log("Request origin-->", origin);
+        }
         // allow non-browser requests
         if (!origin) return cb(null, true);
 
@@ -82,12 +82,11 @@ app.use("/", cashflow);
 app.use("/", login);
 app.use("/", authentication);
 app.use("/daysNgapi", daysNgapi);
-// app.use("/multiPuck", multiPuck);
 
 
 // connectDB().then(() => {
 //     app.listen(port, () => {
-//         console.log(`👽 Listening on some port ${port}`)
+//         console.log(`👽 Listening on some port`)
 //     })
 // })
 
