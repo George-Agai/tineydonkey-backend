@@ -8,14 +8,14 @@ function startCronJob() {
   cron.schedule('*/5 * * * *', async() => {
     await axios.get(functionUrl)
       .then((response) => {
-        console.log(`✅ Warm-up successful.`);
+        console.log(`✅ Warm-up successful`);
       })
       .catch((error) => {
         console.error(`❌ Warm-up failed`);
       });
   });
 
-  console.log('⚙️ Warm-up script started.');
+  console.log('⚙️ Warm-up script started');
 
   setInterval(() => {}, 1000);
 }
