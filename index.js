@@ -15,6 +15,8 @@ const login = require("./TineyDonkeyRoutes/login");
 const authentication = require("./TineyDonkeyRoutes/business");
 const daysNgapi = require("./DaysNgapi/routes/user");
 
+require("./MultiPuck/routes/server");
+
 const url = process.env.URL
 const testUrl = process.env.TEST_URL
 const phone = process.env.PHONE
@@ -27,7 +29,7 @@ const allowedOrigins = [
     url, daysNgapiProd, daysNgapiDev, testUrl, phone
 ].map(normalize);
 
-console.log("Allowed origins:", allowedOrigins);
+// console.log("Allowed origins:", allowedOrigins);
 //Set up CORS middleware *before* any routes
 app.use(cors({
     origin: (origin, cb) => {
@@ -53,7 +55,7 @@ const port = process.env.PORT || 3000
 const connectDB = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI);
-        console.log(`Database connected`);
+        console.log(`👾 Database connected`);
     } catch (error) {
         console.log(error);
         process.exit(1);
@@ -74,11 +76,12 @@ app.use("/", cashflow);
 app.use("/", login);
 app.use("/", authentication);
 app.use("/daysNgapi", daysNgapi);
+// app.use("/multiPuck", multiPuck);
 
 
 connectDB().then(() => {
     app.listen(port, () => {
-        console.log(`listening on some port ${port}`)
+        console.log(`👽 Listening on some port`)
     })
 })
 cronJob()
