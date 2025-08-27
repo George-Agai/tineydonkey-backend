@@ -22,11 +22,12 @@ const testUrl = process.env.TEST_URL
 const phone = process.env.PHONE
 const daysNgapiDev = process.env.DAYS_NGAPI_DEV
 const daysNgapiProd = process.env.DAYS_NGAPI_PROD
+const multiPuck = process.env.MULTI_PUCK
 
 const normalize = (u) => u?.replace(/\/$/, '');
 //Configure your allowed origins
 const allowedOrigins = [
-    url, daysNgapiProd, daysNgapiDev, testUrl, phone
+    url, daysNgapiProd, daysNgapiDev, testUrl, phone, multiPuck
 ].map(normalize);
 
 // console.log("Allowed origins:", allowedOrigins);
