@@ -4,6 +4,9 @@ require('dotenv').config();
 const morgan = require('morgan');
 const cors = require('cors')
 var app = express();
+const http = require("http");
+// const { Server } = require("socket.io");
+const httpServer = http.createServer(app);
 const cronJob = require('./cron.js');
 
 const sale = require("./TineyDonkeyRoutes/sale")
@@ -15,7 +18,9 @@ const login = require("./TineyDonkeyRoutes/login");
 const authentication = require("./TineyDonkeyRoutes/business");
 const daysNgapi = require("./DaysNgapi/routes/user");
 
-require("./MultiPuck/routes/server");
+// require("./MultiPuck/routes/server");
+require("./MultiPuck/routes/server")(httpServer);
+
 
 const url = process.env.URL
 const testUrl = process.env.TEST_URL
@@ -34,25 +39,25 @@ const allowedOrigins = [
 //Set up CORS middleware *before* any routes
 app.use(cors({
     origin: (origin, cb) => {
-      console.log("Request origin-->", origin);
-      // allow non-browser requests
-      if (!origin) return cb(null, true);
-  
-      if (allowedOrigins.includes(normalize(origin))) {
-        return cb(null, true);
-      }
-  
-      cb(new Error('Not allowed by CORS'));
+        console.log("Request origin-->", origin);
+        // allow non-browser requests
+        if (!origin) return cb(null, true);
+
+        if (allowedOrigins.includes(normalize(origin))) {
+            return cb(null, true);
+        }
+
+        cb(new Error('Not allowed by CORS'));
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-  }));
+}));
 //Explicitly handle OPTIONS preflight
 app.options('*', cors());
 
 
 
-const port = process.env.PORT || 3000
+const port = process.env.PORT
 const connectDB = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI);
@@ -80,9 +85,16 @@ app.use("/daysNgapi", daysNgapi);
 // app.use("/multiPuck", multiPuck);
 
 
+// connectDB().then(() => {
+//     app.listen(port, () => {
+//         console.log(`👽 Listening on some port ${port}`)
+//     })
+// })
+
 connectDB().then(() => {
-    app.listen(port, () => {
+    httpServer.listen(port, () => {
         console.log(`👽 Listening on some port`)
     })
 })
+
 cronJob()
